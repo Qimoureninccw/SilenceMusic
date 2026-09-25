@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/* ============ 主题色定义 ============ */
+:root {
+  --accent: #ec4899;
+  --accent-hover: #db2777;
+  --accent-rgb: 236, 72, 153;
+}
+
+/* ============ 把 pink 色阶重定向到主题色 ============ */
+@theme {
+  --color-pink-300: var(--accent);
+  --color-pink-400: var(--accent);
+  --color-pink-500: var(--accent);
+  --color-pink-600: var(--accent);
+  --color-pink-700: var(--accent-hover);
+}
+
+/* ============ 工具类 ============ */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.text-accent { color: var(--accent); }
+.bg-accent { background-color: var(--accent); }
+.bg-accent-hover:hover { background-color: var(--accent-hover); }
+.border-accent { border-color: var(--accent); }
+.accent-accent { accent-color: var(--accent); }
+.ring-accent:focus { --tw-ring-color: var(--accent); }
+
+.bg-accent-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    color-mix(in srgb, var(--accent) 50%, #7c3aed) 100%
+  );
+}
