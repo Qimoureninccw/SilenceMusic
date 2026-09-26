@@ -1,6 +1,6 @@
 // src/store/themeStore.ts
 import { create } from 'zustand'
-import { extractThemeColor, type ExtractedColor } from '../utils/colorExtract'
+import { type ExtractedColor } from '../utils/colorExtract'
 
 export interface ThemeColor {
   id: string
