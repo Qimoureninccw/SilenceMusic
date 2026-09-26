@@ -19,7 +19,6 @@ export default function Toplist() {
   useEffect(() => {
     api.toplist()
       .then(data => {
-        // 官方榜单一般前 4 个是"飙升榜/新歌榜/原创榜/热歌榜"，可单独强调
         setLists(data ?? [])
       })
       .catch(err => console.error('[Toplist]', err))
@@ -28,7 +27,6 @@ export default function Toplist() {
 
   if (loading) return <div className="p-6 text-neutral-500">加载中...</div>
 
-  // 前 4 个作为"官方榜"，其余作为"更多榜单"
   const official = lists.slice(0, 4)
   const others = lists.slice(4)
 

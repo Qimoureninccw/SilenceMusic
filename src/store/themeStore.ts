@@ -1,11 +1,12 @@
 // src/store/themeStore.ts
 import { create } from 'zustand'
+import { extractThemeColor, type ExtractedColor } from '../utils/colorExtract'
 
 export interface ThemeColor {
   id: string
   name: string
-  accent: string      // 主色
-  hover: string       // hover 色（深一点）
+  accent: string
+  hover: string
 }
 
 export const THEMES: ThemeColor[] = [
@@ -20,39 +21,57 @@ export const THEMES: ThemeColor[] = [
 ]
 
 interface ThemeState {
-  themeId: string
+  themeId: string                  // 预设 id 或 'cover'
+  accentOverride: ExtractedColor | null   // 跟随封面时的动态色
   setTheme: (id: string) => void
+  setCoverColor: (color: ExtractedColor | null) => void
   initTheme: () => void
 }
 
 const KEY = 'sm_theme'
 
-function applyTheme(theme: ThemeColor) {
+function applyColor(accent: string, hover: string, rgb?: string) {
   const root = document.documentElement
-  root.style.setProperty('--accent', theme.accent)
-  root.style.setProperty('--accent-hover', theme.hover)
-  // 解析 hex 到 rgb，方便以后用 rgba()
-  const r = parseInt(theme.accent.slice(1, 3), 16)
-  const g = parseInt(theme.accent.slice(3, 5), 16)
-  const b = parseInt(theme.accent.slice(5, 7), 16)
-  root.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`)
+  root.style.setProperty('--accent', accent)
+  root.style.setProperty('--accent-hover', hover)
+  if (rgb) {
+    root.style.setProperty('--accent-rgb', rgb)
+  } else {
+    const r = parseInt(accent.slice(1, 3), 16)
+    const g = parseInt(accent.slice(3, 5), 16)
+    const b = parseInt(accent.slice(5, 7), 16)
+    root.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`)
+  }
 }
 
-export const useThemeStore = create<ThemeState>((set) => ({
+export const useThemeStore = create<ThemeState>((set, get) => ({
   themeId: localStorage.getItem(KEY) ?? 'pink',
+  accentOverride: null,
 
   setTheme: (id) => {
+    localStorage.setItem(KEY, id)
+    set({ themeId: id, accentOverride: null })
+
+    if (id === 'cover') return   // 跟随封面：不主动应用，等 setCoverColor 来设
+
     const theme = THEMES.find(t => t.id === id)
     if (!theme) return
-    applyTheme(theme)
-    localStorage.setItem(KEY, id)
-    set({ themeId: id })
+    applyColor(theme.accent, theme.hover)
+  },
+
+  setCoverColor: (color) => {
+    set({ accentOverride: color })
+    // 只有当前主题是"跟随封面"时才真正应用
+    if (get().themeId === 'cover' && color) {
+      applyColor(color.accent, color.accentHover, color.accentRgb)
+    }
   },
 
   initTheme: () => {
     const id = localStorage.getItem(KEY) ?? 'pink'
+    set({ themeId: id })
+    if (id === 'cover') return
     const theme = THEMES.find(t => t.id === id) ?? THEMES[0]
-    applyTheme(theme)
-    set({ themeId: theme.id })
+    applyColor(theme.accent, theme.hover)
   },
 }))

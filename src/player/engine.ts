@@ -77,6 +77,9 @@ class PlayerEngine {
   seek(t: number) { this.audio.currentTime = t }
 
   get currentTime() { return this.audio.currentTime }
+  get preciseCurrentTime() {
+  return this.audio.currentTime
+  }
   get duration() { return this.audio.duration || 0 }
   get paused() { return this.audio.paused }
 

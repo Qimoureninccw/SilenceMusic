@@ -243,4 +243,12 @@ export const api = {
   async logout() {
     return request<any>('/logout', { timestamp: Date.now() })
   },
+  // 获取动态封面
+  async dynamicCover(id: number): Promise<{ videoUrl: string | null }> {
+    const r = await request<any>('/song/dynamic/cover', { id }, { noCache: true })
+    const url = r.data?.videoPlayUrl ?? null
+    return {
+      videoUrl: url ? url.replace(/^http:/, 'https:') : null,
+    }
+  }
 }

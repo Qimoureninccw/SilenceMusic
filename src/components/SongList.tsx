@@ -1,5 +1,6 @@
 // src/components/SongList.tsx
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Play, Pause, Plus, Heart, ListPlus, Trash2 } from 'lucide-react'
 import { usePlayerStore } from '../store/playerStore'
 import { useUserStore } from '../store/userStore'
@@ -99,7 +100,18 @@ export default function SongList({ songs, sourceId = null, showAlbum = true, onR
               <div className="min-w-0">
                 <div className="truncate">{song.name}</div>
                 <div className="truncate text-xs text-neutral-500">
-                  {song.ar?.map(a => a.name).join(' / ') ?? ''}
+                  {song.ar?.map((a, idx) => (
+                    <span key={a.id}>
+                      <Link
+                        to={`/artist/${a.id}`}
+                        onClick={e => e.stopPropagation()}
+                        className="hover:text-white hover:underline"
+                      >
+                        {a.name}
+                      </Link>
+                      {idx < song.ar.length - 1 && ' / '}
+                    </span>
+                  )) ?? ''}
                 </div>
               </div>
             </div>
@@ -107,7 +119,17 @@ export default function SongList({ songs, sourceId = null, showAlbum = true, onR
             {/* 专辑 */}
             {showAlbum && (
               <div className="truncate text-neutral-400 text-xs">
-                {song.al?.name ?? ''}
+                {song.al?.id ? (
+                  <Link
+                    to={`/album/${song.al.id}`}
+                    onClick={e => e.stopPropagation()}
+                    className="hover:text-white hover:underline"
+                  >
+                    {song.al.name}
+                  </Link>
+                ) : (
+                  song.al?.name ?? ''
+                )}
               </div>
             )}
 
@@ -144,7 +166,7 @@ export default function SongList({ songs, sourceId = null, showAlbum = true, onR
                 <Plus size={14} />
               </button>
 
-              {/* 从歌单移除（仅当传入 onRemove 时显示） */}
+              {/* 从歌单移除 */}
               {onRemove && (
                 <button
                   onClick={(e) => {

@@ -47,8 +47,8 @@ export interface SongUrl {
 export interface Song {
   id: number
   name: string
-  ar: Artist[]           // 保留（这个一般都有）
-  al: Album              // 保留，但渲染时要判断
+  ar: Artist[]
+  al: Album
   dt: number
   fee: number
   mv?: number

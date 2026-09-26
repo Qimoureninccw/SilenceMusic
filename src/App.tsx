@@ -16,17 +16,37 @@ import History from './pages/History'
 import LocalPlaylistDetail from './pages/LocalPlaylistDetail'
 import Settings from './pages/Settings'
 import { useThemeStore } from './store/themeStore'
+import AlbumDetail from './pages/AlbumDetail'
+import ArtistDetail from './pages/ArtistDetail'
+import { extractThemeColor } from './utils/colorExtract'
 
 
 function MediaSessionSync() {
   useHistoryTracker()
   const initTheme = useThemeStore(s => s.initTheme)
+  const setCoverColor = useThemeStore(s => s.setCoverColor)
+  const themeId = useThemeStore(s => s.themeId)
   const { queue, currentIndex, playing } = usePlayerStore()
   const song = currentIndex >= 0 ? queue[currentIndex] : null
 
   useEffect(() => { initTheme() }, [initTheme])
   useEffect(() => { bindMediaSession() }, [])
   useEffect(() => { updateMediaSession(song, playing) }, [song, playing])
+  useEffect(() => { initTheme() }, [initTheme])
+  useEffect(() => { bindMediaSession() }, [])
+  useEffect(() => { updateMediaSession(song, playing) }, [song, playing])
+    useEffect(() => {
+    if (themeId !== 'cover' || !song?.al?.picUrl) {
+      setCoverColor(null)
+      return
+    }
+    let canceled = false
+    extractThemeColor(song.al.picUrl).then(c => {
+      if (!canceled) setCoverColor(c)
+    })
+    return () => { canceled = true }
+  }, [themeId, song?.id, setCoverColor])
+
   return null
 }
 
@@ -48,6 +68,8 @@ export default function App() {
           <Route path="/liked" element={<Liked />} />
           <Route path="/history" element={<History />} />
           <Route path="/local-playlist/:id" element={<LocalPlaylistDetail />} />
+          <Route path="/album/:id" element={<AlbumDetail />} />
+          <Route path="/artist/:id" element={<ArtistDetail />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

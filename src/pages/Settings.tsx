@@ -6,6 +6,7 @@ import type { Quality } from '../api/types'
 import { clearAllCache } from '../utils/cache'
 import type { PlayMode } from '../store/playerStore'
 import { useThemeStore, THEMES } from '../store/themeStore'
+import { Image as ImageIcon } from 'lucide-react'
 
 const QUALITY_OPTIONS: { value: Quality; label: string; desc: string }[] = [
   { value: 'standard', label: '标准', desc: '128 kbps' },
@@ -73,41 +74,67 @@ export default function Settings() {
       <h1 className="text-2xl font-bold mb-6">设置</h1>
 
       {/* 主题色 */}
-      <section className="mb-8">
-        <h2 className="text-sm font-medium text-neutral-400 mb-3 flex items-center gap-2">
-          <Palette size={14} />
-          主题色
-        </h2>
-        <div className="bg-neutral-900 rounded-xl p-4">
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
-            {THEMES.map(t => {
-              const active = themeId === t.id
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => setTheme(t.id)}
-                  className="flex flex-col items-center gap-2 group"
-                  title={t.name}
-                >
-                  <div
-                    className={`w-10 h-10 rounded-full transition-all ${
-                      active ? 'scale-110 ring-2 ring-offset-2 ring-offset-neutral-900' : 'hover:scale-105'
-                    }`}
-                    style={{
-                      backgroundColor: t.accent,
-                      // @ts-ignore
-                      '--tw-ring-color': t.accent,
-                    } as any}
-                  />
-                  <span className={`text-xs ${active ? 'text-white' : 'text-neutral-500'}`}>
-                    {t.name}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
+     <section className="mb-8">
+  <h2 className="text-sm font-medium text-neutral-400 mb-3 flex items-center gap-2">
+    <Palette size={14} />
+    主题色
+  </h2>
+  <div className="bg-neutral-900 rounded-xl p-4 space-y-3">
+    {/* 跟随封面开关 */}
+    <button
+      onClick={() => setTheme('cover')}
+      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
+        themeId === 'cover'
+          ? 'bg-neutral-800 ring-1 ring-pink-500'
+          : 'hover:bg-neutral-800/50'
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className="w-6 h-6 rounded-full"
+          style={{
+            background: 'conic-gradient(from 0deg, #ec4899, #8b5cf6, #3b82f6, #06b6d4, #10b981, #f59e0b, #ec4899)',
+          }}
+        />
+        <div className="text-left">
+          <div className="text-sm">跟随当前播放封面</div>
+          <div className="text-xs text-neutral-500">从歌曲封面提取主色</div>
         </div>
-      </section>
+      </div>
+      {themeId === 'cover' && <Check size={18} className="text-pink-500" />}
+    </button>
+
+    {/* 预设颜色 */}
+    <div className="grid grid-cols-4 sm:grid-cols-8 gap-3 pt-2">
+      {THEMES.map(t => {
+        const active = themeId === t.id
+        return (
+          <button
+            key={t.id}
+            onClick={() => setTheme(t.id)}
+            className="flex flex-col items-center gap-2 group"
+            title={t.name}
+          >
+            <div
+              className={`w-10 h-10 rounded-full transition-all ${
+                active ? 'scale-110 ring-2 ring-offset-2 ring-offset-neutral-900' : 'hover:scale-105'
+              }`}
+              style={{
+                backgroundColor: t.accent,
+                // @ts-ignore
+                '--tw-ring-color': t.accent,
+              } as any}
+            />
+            <span className={`text-xs ${active ? 'text-white' : 'text-neutral-500'}`}>
+              {t.name}
+            </span>
+          </button>
+        )
+      })}
+    </div>
+  </div>
+</section>
+
 
       {/* 音质 */}
       <section className="mb-8">
@@ -225,13 +252,40 @@ export default function Settings() {
           </div>
           <div className="flex justify-between">
             <span className="text-neutral-500">版本</span>
-            <span>0.1.0</span>
+            <span>1.1 Beta</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-neutral-500">API 地址</span>
-            <span className="text-xs text-neutral-400 truncate ml-4 max-w-[60%]">
+            {/* <span className="text-xs text-neutral-400 truncate ml-4 max-w-[60%]"> */}
+            {/* <span> {apiBase} </span> */}
+            {/* </span> */}
+            <a
+              href="{apiBase}"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent hover:underline"
+            >
               {apiBase}
-            </span>
+            </a>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-neutral-500">开源地址</span>
+            <a
+              href="https://github.com/Qimoureninccw/SilenceMusic"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent hover:underline"
+            >
+              https://github.com/Qimoureninccw/SilenceMusic
+            </a>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-neutral-500">作者</span>
+            <span>Silence</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-neutral-500">联系方式</span>
+            <span>QQ: 3179711976</span>
           </div>
         </div>
       </section>
