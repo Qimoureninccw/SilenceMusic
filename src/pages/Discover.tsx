@@ -16,13 +16,10 @@ export default function Discover() {
   useEffect(() => {
     Promise.all([
       api.personalized(18),
-      api.topSong(0),
+      api.personalizedNewSong(12),
     ]).then(([pl, ns]) => {
-      console.log('推荐歌单第一项：', pl?.[0])
-      console.log('新歌第一首：', ns?.[0])
       setPlaylists((pl ?? []).filter(p => p && (p.coverImgUrl || (p as any).picUrl)))
-      const valid = (ns ?? []).filter(s => s && (s.al || (s as any).album))
-      setNewsongs(valid.slice(0, 12))
+      setNewsongs(ns.slice(0, 12))
     }).catch(err => console.error('[Discover]', err))
       .finally(() => setLoading(false))
   }, [])
@@ -36,11 +33,12 @@ export default function Discover() {
         <h2 className="text-xl font-semibold mb-4">推荐歌单</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {playlists.map(p => {
-            const cover = p.coverImgUrl || (p as any).picUrl || ''
+            const cover = (p.coverImgUrl || (p as any).picUrl || '').replace(/^http:/, 'https:')
+            const hasCover = cover.startsWith('http')
             return (
               <Link key={p.id} to={`/playlist/${p.id}`} className="group">
                 <div className="relative aspect-square overflow-hidden rounded-lg bg-neutral-800">
-                  {cover ? (
+                  {hasCover ? (
                     <img
                       src={`${cover}?param=300y300`}
                       alt={p.name}
@@ -67,9 +65,12 @@ export default function Discover() {
         <h2 className="text-xl font-semibold mb-4">新歌速递</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {newsongs.map((s, index) => {
-            const al: any = s.al ?? (s as any).album ?? {}
-            const ar: any[] = s.ar ?? (s as any).artists ?? []
-            const cover = al.picUrl || ''
+            const cover = (s.al?.picUrl || '').replace(/^http:/, 'https:')
+            const hasCover = cover.startsWith('http')
+            const artists = Array.isArray(s.ar) && s.ar.length > 0
+              ? s.ar.map(a => a?.name).filter(Boolean).join(' / ')
+              : '未知歌手'
+
             return (
               <div
                 key={s.id}
@@ -77,7 +78,7 @@ export default function Discover() {
                 className="group cursor-pointer"
               >
                 <div className="relative aspect-square overflow-hidden rounded-lg bg-neutral-800">
-                  {cover ? (
+                  {hasCover ? (
                     <img
                       src={`${cover}?param=300y300`}
                       alt={s.name}
@@ -103,9 +104,7 @@ export default function Discover() {
                   </button>
                 </div>
                 <div className="mt-2 text-sm line-clamp-2">{s.name}</div>
-                <div className="text-xs text-neutral-500 line-clamp-1">
-                  {ar.map((a: any) => a.name).join(' / ')}
-                </div>
+                <div className="text-xs text-neutral-500 line-clamp-1">{artists}</div>
               </div>
             )
           })}

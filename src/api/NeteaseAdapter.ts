@@ -250,5 +250,34 @@ export const api = {
     return {
       videoUrl: url ? url.replace(/^http:/, 'https:') : null,
     }
-  }
+  },
+
+  // 新歌速递
+  async personalizedNewSong(limit = 12): Promise<Song[]> {
+  return cached(`personalized_newsong:${limit}`, TTL.recommend, async () => {
+    const r = await request<any>('/personalized/newsong', { limit })
+    return (r.result ?? [])
+      .map((item: any) => item.song)
+      .filter((s: any) => s && s.album && s.artists?.length)
+      .map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        ar: s.artists.map((a: any) => ({
+          id: a.id,
+          name: a.name,
+          picUrl: a.picUrl,
+        })),
+        al: {
+          id: s.album.id,
+          name: s.album.name,
+          picUrl: s.album.picUrl,
+          publishTime: s.album.publishTime,
+        },
+        dt: s.duration,
+        fee: s.fee,
+        mv: s.mvid,
+        alia: s.alias,
+      })) as Song[]
+  })
+},
 }
