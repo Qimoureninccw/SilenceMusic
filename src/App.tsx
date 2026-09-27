@@ -19,6 +19,8 @@ import { useThemeStore } from './store/themeStore'
 import AlbumDetail from './pages/AlbumDetail'
 import ArtistDetail from './pages/ArtistDetail'
 import { extractThemeColor } from './utils/colorExtract'
+import SongRedirect from './pages/SongRedirect'
+
 
 
 function MediaSessionSync() {
@@ -70,6 +72,7 @@ export default function App() {
           <Route path="/local-playlist/:id" element={<LocalPlaylistDetail />} />
           <Route path="/album/:id" element={<AlbumDetail />} />
           <Route path="/artist/:id" element={<ArtistDetail />} />
+          <Route path="/song/:id" element={<SongRedirect />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

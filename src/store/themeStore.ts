@@ -21,19 +21,31 @@ export const THEMES: ThemeColor[] = [
 ]
 
 interface ThemeState {
-  themeId: string                  // 预设 id 或 'cover'
-  accentOverride: ExtractedColor | null   // 跟随封面时的动态色
+  themeId: string
+  customAccent: string | null   // 自定义十六进制色，比如 '#ff0000'
+  accentOverride: ExtractedColor | null
   setTheme: (id: string) => void
+  setCustomTheme: (hex: string) => void
   setCoverColor: (color: ExtractedColor | null) => void
   initTheme: () => void
 }
 
 const KEY = 'sm_theme'
+const CUSTOM_KEY = 'sm_theme_custom'
 
-function applyColor(accent: string, hover: string, rgb?: string) {
+/** 从 hex 生成 hover 色（亮度降 10%） */
+function darkerHex(hex: string): string {
+  const h = hex.replace('#', '')
+  const r = Math.max(0, parseInt(h.slice(0, 2), 16) - 25)
+  const g = Math.max(0, parseInt(h.slice(2, 4), 16) - 25)
+  const b = Math.max(0, parseInt(h.slice(4, 6), 16) - 25)
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')
+}
+
+function applyColor(accent: string, hover?: string, rgb?: string) {
   const root = document.documentElement
   root.style.setProperty('--accent', accent)
-  root.style.setProperty('--accent-hover', hover)
+  root.style.setProperty('--accent-hover', hover ?? darkerHex(accent))
   if (rgb) {
     root.style.setProperty('--accent-rgb', rgb)
   } else {
@@ -44,24 +56,37 @@ function applyColor(accent: string, hover: string, rgb?: string) {
   }
 }
 
+/** 校验是否是合法的 #RRGGBB */
+export function isValidHex(hex: string): boolean {
+  return /^#[0-9a-fA-F]{6}$/.test(hex)
+}
+
 export const useThemeStore = create<ThemeState>((set, get) => ({
   themeId: localStorage.getItem(KEY) ?? 'pink',
+  customAccent: localStorage.getItem(CUSTOM_KEY),
   accentOverride: null,
 
   setTheme: (id) => {
     localStorage.setItem(KEY, id)
     set({ themeId: id, accentOverride: null })
 
-    if (id === 'cover') return   // 跟随封面：不主动应用，等 setCoverColor 来设
+    if (id === 'cover' || id === 'custom') return
 
     const theme = THEMES.find(t => t.id === id)
     if (!theme) return
     applyColor(theme.accent, theme.hover)
   },
 
+  setCustomTheme: (hex) => {
+    if (!isValidHex(hex)) return
+    localStorage.setItem(KEY, 'custom')
+    localStorage.setItem(CUSTOM_KEY, hex)
+    set({ themeId: 'custom', customAccent: hex, accentOverride: null })
+    applyColor(hex)
+  },
+
   setCoverColor: (color) => {
     set({ accentOverride: color })
-    // 只有当前主题是"跟随封面"时才真正应用
     if (get().themeId === 'cover' && color) {
       applyColor(color.accent, color.accentHover, color.accentRgb)
     }
@@ -70,7 +95,16 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
   initTheme: () => {
     const id = localStorage.getItem(KEY) ?? 'pink'
     set({ themeId: id })
+
     if (id === 'cover') return
+
+    if (id === 'custom') {
+      const hex = localStorage.getItem(CUSTOM_KEY) ?? '#ec4899'
+      set({ customAccent: hex })
+      applyColor(hex)
+      return
+    }
+
     const theme = THEMES.find(t => t.id === id) ?? THEMES[0]
     applyColor(theme.accent, theme.hover)
   },

@@ -1,45 +1,49 @@
 // src/pages/ArtistDetail.tsx
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Play } from 'lucide-react'
-import { api } from '../api/NeteaseAdapter'
-import { usePlayerStore } from '../store/playerStore'
-import SongList from '../components/SongList'
-import type { Album, Song } from '../api/types'
+import { useEffect, useState } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { ArrowLeft, Play } from "lucide-react";
+import { api } from "../api/NeteaseAdapter";
+import { usePlayerStore } from "../store/playerStore";
+import SongList from "../components/SongList";
+import type { Album, Song } from "../api/types";
+import { Share2 } from "lucide-react";
+import { shareLink } from "../utils/share";
 
-type Tab = 'hot' | 'albums' | 'desc'
+type Tab = "hot" | "albums" | "desc";
 
 export default function ArtistDetail() {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const playAll = usePlayerStore(s => s.playAll)
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const playAll = usePlayerStore((s) => s.playAll);
 
-  const [tab, setTab] = useState<Tab>('hot')
-  const [detail, setDetail] = useState<any>(null)
-  const [hotSongs, setHotSongs] = useState<Song[]>([])
-  const [albums, setAlbums] = useState<Album[]>([])
-  const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState<Tab>("hot");
+  const [detail, setDetail] = useState<any>(null);
+  const [hotSongs, setHotSongs] = useState<Song[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return
-    setLoading(true)
+    if (!id) return;
+    setLoading(true);
     Promise.all([
       api.artistDetail(+id),
       api.artistTopSong(+id),
       api.artistAlbum(+id, 50),
-    ]).then(([d, s, a]) => {
-      setDetail(d)
-      setHotSongs(s ?? [])
-      setAlbums(a.hotAlbums ?? [])
-    }).catch(err => console.error(err))
-      .finally(() => setLoading(false))
-  }, [id])
+    ])
+      .then(([d, s, a]) => {
+        setDetail(d);
+        setHotSongs(s ?? []);
+        setAlbums(a.hotAlbums ?? []);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  if (loading) return <div className="p-6 text-neutral-500">加载中...</div>
-  if (!detail) return <div className="p-6 text-neutral-500">歌手不存在</div>
+  if (loading) return <div className="p-6 text-neutral-500">加载中...</div>;
+  if (!detail) return <div className="p-6 text-neutral-500">歌手不存在</div>;
 
-  const artist = detail.artist ?? {}
-  const cover = artist.cover || artist.picUrl || ''
+  const artist = detail.artist ?? {};
+  const cover = artist.cover || artist.picUrl || "";
 
   return (
     <div className="p-6">
@@ -55,7 +59,11 @@ export default function ArtistDetail() {
       <div className="flex gap-6 mb-6">
         <div className="w-40 h-40 rounded-full overflow-hidden bg-neutral-800 shrink-0">
           {cover ? (
-            <img src={`${cover}?param=400y400`} alt={artist.name} className="w-full h-full object-cover" />
+            <img
+              src={`${cover}?param=400y400`}
+              alt={artist.name}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-neutral-600">
               无头像
@@ -65,10 +73,12 @@ export default function ArtistDetail() {
 
         <div className="flex flex-col justify-end min-w-0">
           <div className="text-xs text-neutral-500 mb-2">歌手</div>
-          <h1 className="text-3xl font-bold mb-3 line-clamp-2">{artist.name}</h1>
+          <h1 className="text-3xl font-bold mb-3 line-clamp-2">
+            {artist.name}
+          </h1>
           {artist.alias?.length > 0 && (
             <div className="text-sm text-neutral-400 mb-2">
-              {artist.alias.join(' / ')}
+              {artist.alias.join(" / ")}
             </div>
           )}
           <div className="text-sm text-neutral-400 mb-4">
@@ -83,6 +93,13 @@ export default function ArtistDetail() {
               <Play size={16} fill="currentColor" />
               播放热门 50
             </button>
+            <button
+              onClick={() => shareLink(`/artist/${id}`, "歌手链接")}
+              className="flex items-center gap-2 px-5 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-full text-sm transition-colors"
+            >
+              <Share2 size={16} />
+              分享
+            </button>
           </div>
         </div>
       </div>
@@ -90,17 +107,17 @@ export default function ArtistDetail() {
       {/* Tab 切换 */}
       <div className="flex gap-6 border-b border-neutral-800 mb-6">
         {[
-          { key: 'hot', label: '热门歌曲' },
-          { key: 'albums', label: '专辑' },
-          { key: 'desc', label: '歌手简介' },
-        ].map(t => (
+          { key: "hot", label: "热门歌曲" },
+          { key: "albums", label: "专辑" },
+          { key: "desc", label: "歌手简介" },
+        ].map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key as Tab)}
             className={`pb-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
               tab === t.key
-                ? 'text-white border-pink-500'
-                : 'text-neutral-400 border-transparent hover:text-white'
+                ? "text-white border-pink-500"
+                : "text-neutral-400 border-transparent hover:text-white"
             }`}
           >
             {t.label}
@@ -109,11 +126,11 @@ export default function ArtistDetail() {
       </div>
 
       {/* 内容 */}
-      {tab === 'hot' && <SongList songs={hotSongs} />}
+      {tab === "hot" && <SongList songs={hotSongs} />}
 
-      {tab === 'albums' && (
+      {tab === "albums" && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {albums.map(a => (
+          {albums.map((a) => (
             <Link key={a.id} to={`/album/${a.id}`} className="group">
               <div className="aspect-square rounded-lg overflow-hidden bg-neutral-800">
                 <img
@@ -141,7 +158,7 @@ export default function ArtistDetail() {
         </div>
       )}
 
-      {tab === 'desc' && (
+      {tab === "desc" && (
         <div className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap max-w-3xl">
           {detail.introduction?.map((block: any, i: number) => (
             <div key={i} className="mb-4">
@@ -152,5 +169,5 @@ export default function ArtistDetail() {
         </div>
       )}
     </div>
-  )
+  );
 }
