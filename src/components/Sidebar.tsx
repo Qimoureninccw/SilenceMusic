@@ -12,7 +12,7 @@ const links = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-52 shrink-0 bg-neutral-950 border-r border-neutral-800 flex flex-col">
+    <aside className="w-52 shrink-0 bg-neutral-950 border-r border-neutral-800 flex-col hidden md:flex">
       <div className="h-14 flex items-center px-5 text-lg font-bold text-pink-500">
         Silence Music
       </div>
